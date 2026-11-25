@@ -35,3 +35,23 @@ export const units = [
   ...makeUnits('a3', 118, [[8, 0], [8, 0], [8, 0], [8, 0], [8, 0], [8, 0]]),
   ...makeUnits('a4', 124, [[8, 0], [8, 0], [8, 0], [8, 0], [8, 0], [8, 0], [8, 0]]),
 ]
+
+// The same 8 sample items go into every unit for now.
+const itemTemplates = [
+  { key: 'a', area: 'Living Room', text: 'Install TV panel + console, rework power', meta: 'LIV-301.1L · Scope' },
+  { key: 'b', area: 'Living Room', text: 'Touch up paint behind sectional', meta: 'Punch' },
+  { key: 'c', area: 'Dining', text: 'Install wall vinyl', meta: 'DIN-901 · short, reordered' },
+  { key: 'd', area: 'Primary Bedroom', text: 'LED headboard panel + sconces', meta: 'MBD-301 / MBD-502 · Scope' },
+  { key: 'e', area: 'Primary Bedroom', text: 'Replace closet doors (2)', meta: 'Go-back · Doors' },
+  { key: 'f', area: 'Guest Bath', text: 'Install LED vanity mirror', meta: 'GBA-601 · Scope' },
+  { key: 'g', area: 'Guest Bath', text: 'Adjust shower door', meta: 'Punch' },
+  { key: 'h', area: 'Entry', text: 'Replace entry door + frame', meta: 'Go-back · Doors' },
+]
+
+export const items = units.flatMap((unit) =>
+  itemTemplates.map((t, i) => {
+    let status = 'Done'
+    if (i >= 8 - unit.openItems) status = t.key === 'c' ? 'Waiting' : 'Open'
+    return { id: unit.id + '-' + t.key, unitId: unit.id, area: t.area, text: t.text, meta: t.meta, status: status }
+  })
+)

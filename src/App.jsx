@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import { properties, sequences, units } from './data/sampleData'
+import { properties, sequences, units, items } from './data/sampleData'
 
 function PropertyCard({ property, onOpen }) {
   return (
@@ -49,21 +49,80 @@ function SequenceCard({ sequence, onOpen }) {
   )
 }
 
-function UnitTile({ unit }) {
+function UnitTile({ unit, onOpen }) {
   let tileClass = 'tile'
   if (unit.pct === 100) tileClass = 'tile tile-done'
   else if (unit.pct > 0) tileClass = 'tile tile-progress'
 
   return (
-    <button className={tileClass}>
+    <button className={tileClass} onClick={onOpen}>
       <span className="tile-num">{unit.number}</span>
       <span className="tile-label">{unit.openItems > 0 ? unit.openItems + ' open' : 'Done'}</span>
     </button>
   )
 }
 
-function SequencePage({ property, sequence, onBack }) {
+const statusClasses = {
+  'Open': 'pill-open',
+  'In progress': 'pill-progress',
+  'Waiting': 'pill-waiting',
+  'Deferred': 'pill-deferred',
+  'Done': 'pill-done',
+}
+
+function ItemRow({ item }) {
+  const done = item.status === 'Done'
+  return (
+    <div className={done ? 'item-row row-done' : 'item-row'}>
+      <div className="check">{done ? '✓' : ''}</div>
+      <div className="item-body">
+        <span className="item-text">{item.text}</span>
+        <span className="item-meta">{item.meta}</span>
+      </div>
+      <span className={'pill ' + statusClasses[item.status]}>{item.status}</span>
+    </div>
+  )
+}
+
+const areaOrder = ['Living Room', 'Dining', 'Primary Bedroom', 'Guest Bath', 'Entry']
+
+function UnitPage({ property, sequence, unit, onBack }) {
+  const unitItems = items.filter((it) => it.unitId === unit.id)
+  return (
+    <div className="app">
+      <header className="header">
+        <button className="back-btn" onClick={onBack} aria-label="Back">‹</button>
+        <div>
+          <div className="header-sub">{property.name} · {sequence.name}</div>
+          <div className="header-title">Unit {unit.number}</div>
+        </div>
+      </header>
+
+      <main className="screen">
+        {areaOrder.map((area) => {
+          const areaItems = unitItems.filter((it) => it.area === area)
+          if (areaItems.length === 0) return null
+          return (
+            <div key={area} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div className="area-label">{area}</div>
+              {areaItems.map((item) => (
+                <ItemRow key={item.id} item={item} />
+              ))}
+            </div>
+          )
+        })}
+      </main>
+    </div>
+  )
+}
+
+function SequencePage({ property, sequence, onBack}) {
+  const [selectedUnitId, setSelectedUnitId] = useState(null)
   const sequenceUnits = units.filter((u) => u.sequenceId === sequence.id)
+  const selectedUnit = sequenceUnits.find((u) => u.id === selectedUnitId)
+  if (selectedUnit) {
+    return <UnitPage property={property} sequence={sequence} unit={selectedUnit} onBack={() => setSelectedUnitId(null)} />
+  }
   return (
     <div className="app">
       <header className="header">
@@ -79,7 +138,7 @@ function SequencePage({ property, sequence, onBack }) {
         {sequenceUnits.length === 0 && <p className="muted">No units added yet.</p>}
         <div className="tile-grid">
           {sequenceUnits.map((unit) => (
-            <UnitTile key={unit.id} unit={unit} />
+            <UnitTile key={unit.id} unit={unit} onOpen={ () => setSelectedUnitId(unit.id) } />
           ))}
         </div>
       </main>
