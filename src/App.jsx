@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import { properties } from './data/sampleData'
+import { properties, sequences } from './data/sampleData'
 
 function PropertyCard({ property, onOpen }) {
   return (
@@ -27,7 +27,30 @@ function PropertyCard({ property, onOpen }) {
   )
 }
 
+const statusLabels = { complete: 'Complete', active: 'In progress', upcoming: 'Upcoming' }
+
+function SequenceCard({ sequence }) {
+  return (
+    <button className={'card seq-' + sequence.status}>
+      <div className="card-top">
+        <span className="card-name">{sequence.name} · {sequence.units} units</span>
+        <span className={'pill pill-' + sequence.status}>{statusLabels[sequence.status]}</span>
+      </div>
+      <div className="seq-sub">Units {sequence.range} · delivery {sequence.delivery}</div>
+      <div className="bar">
+        <div className="bar-fill" style={{ width: sequence.pct + '%' }}></div>
+      </div>
+      <div className="seq-stats">
+        <span><strong>{sequence.openItems}</strong> open items</span>
+        <span><strong>{sequence.received}/{sequence.expected}</strong> received</span>
+        <span className="owed"><strong>{sequence.owed}</strong> owed</span>
+      </div>
+    </button>
+  )
+}
+
 function PropertyPage({ property, onBack }) {
+  const propertySequences = sequences.filter((s) => s.propertyId === property.id)
   return (
     <div className="app">
       <header className="header">
@@ -39,7 +62,10 @@ function PropertyPage({ property, onBack }) {
       </header>
 
       <main className="screen">
-        <p className="muted">{property.units} units · sequences coming next</p>
+        <p className="muted">{property.units} units · {propertySequences.length} sequences</p>
+        {propertySequences.map((sequence) => (
+          <SequenceCard key={sequence.id} sequence={sequence} />
+        ))}
       </main>
     </div>
   )
