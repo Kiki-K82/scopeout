@@ -86,3 +86,19 @@
   color: #5B6573;
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.back-btn {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: #2E3A4B;
+  color: #FFFFFF;
+  font-size: 20px;
+  cursor: pointer;
+}
