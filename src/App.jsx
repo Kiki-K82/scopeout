@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import './App.css'
-import { properties, sequences } from './data/sampleData'
+import { properties, sequences, units } from './data/sampleData'
 
 function PropertyCard({ property, onOpen }) {
   return (
@@ -29,9 +29,9 @@ function PropertyCard({ property, onOpen }) {
 
 const statusLabels = { complete: 'Complete', active: 'In progress', upcoming: 'Upcoming' }
 
-function SequenceCard({ sequence }) {
+function SequenceCard({ sequence, onOpen }) {
   return (
-    <button className={'card seq-' + sequence.status}>
+    <button className={'card seq-' + sequence.status} onClick={onOpen}>
       <div className="card-top">
         <span className="card-name">{sequence.name} · {sequence.units} units</span>
         <span className={'pill pill-' + sequence.status}>{statusLabels[sequence.status]}</span>
@@ -49,8 +49,51 @@ function SequenceCard({ sequence }) {
   )
 }
 
+function UnitTile({ unit }) {
+  let tileClass = 'tile'
+  if (unit.pct === 100) tileClass = 'tile tile-done'
+  else if (unit.pct > 0) tileClass = 'tile tile-progress'
+
+  return (
+    <button className={tileClass}>
+      <span className="tile-num">{unit.number}</span>
+      <span className="tile-label">{unit.openItems > 0 ? unit.openItems + ' open' : 'Done'}</span>
+    </button>
+  )
+}
+
+function SequencePage({ property, sequence, onBack }) {
+  const sequenceUnits = units.filter((u) => u.sequenceId === sequence.id)
+  return (
+    <div className="app">
+      <header className="header">
+        <button className="back-btn" onClick={onBack} aria-label="Back">‹</button>
+        <div>
+          <div className="header-sub">{property.name}</div>
+          <div className="header-title">{sequence.name} · units</div>
+        </div>
+      </header>
+
+      <main className="screen">
+        <p className="muted">{sequence.units} units · delivery {sequence.delivery}</p>
+        {sequenceUnits.length === 0 && <p className="muted">No units added yet.</p>}
+        <div className="tile-grid">
+          {sequenceUnits.map((unit) => (
+            <UnitTile key={unit.id} unit={unit} />
+          ))}
+        </div>
+      </main>
+    </div>
+  )
+}
+
 function PropertyPage({ property, onBack }) {
+  const [selectedSeqId, setSelectedSeqId] = useState(null)
   const propertySequences = sequences.filter((s) => s.propertyId === property.id)
+  const selectedSeq = propertySequences.find((s) => s.id === selectedSeqId)
+  if (selectedSeq) {
+    return <SequencePage property={property} sequence={selectedSeq} onBack={() => setSelectedSeqId(null)} />
+  }
   return (
     <div className="app">
       <header className="header">
@@ -64,7 +107,7 @@ function PropertyPage({ property, onBack }) {
       <main className="screen">
         <p className="muted">{property.units} units · {propertySequences.length} sequences</p>
         {propertySequences.map((sequence) => (
-          <SequenceCard key={sequence.id} sequence={sequence} />
+          <SequenceCard key={sequence.id} sequence={sequence} onOpen={() => setSelectedSeqId(sequence.id)} />
         ))}
       </main>
     </div>

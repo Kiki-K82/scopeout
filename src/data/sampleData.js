@@ -16,3 +16,22 @@ export const sequences = [
   { id: 'c1', propertyId: 'c', name: 'Seq 1', units: 9, range: '301–309', delivery: '—', status: 'active',   openItems: 18, received: 0, expected: 0, owed: 0, pct: 45 },
   { id: 'c2', propertyId: 'c', name: 'Seq 2', units: 9, range: '310–318', delivery: '—', status: 'upcoming', openItems: 23, received: 0, expected: 0, owed: 0, pct: 0 },
 ]
+
+// Helper: builds a list of units for one sequence.
+// Each [openItems, pct] pair is one unit, numbered from firstNumber up.
+function makeUnits(sequenceId, firstNumber, list) {
+  return list.map((pair, i) => ({
+    id: sequenceId + '-' + (firstNumber + i),
+    sequenceId: sequenceId,
+    number: String(firstNumber + i),
+    openItems: pair[0],
+    pct: pair[1],
+  }))
+}
+
+export const units = [
+  ...makeUnits('a1', 101, [[0, 100], [0, 100], [0, 100], [0, 100], [0, 100], [0, 100], [0, 100], [0, 100], [0, 100]]),
+  ...makeUnits('a2', 110, [[4, 43], [0, 100], [3, 57], [5, 29], [2, 71], [6, 14], [0, 100], [3, 57]]),
+  ...makeUnits('a3', 118, [[8, 0], [8, 0], [8, 0], [8, 0], [8, 0], [8, 0]]),
+  ...makeUnits('a4', 124, [[8, 0], [8, 0], [8, 0], [8, 0], [8, 0], [8, 0], [8, 0]]),
+]
